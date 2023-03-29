@@ -1,0 +1,63 @@
+service: dio-live-servess-project
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  region: us-east-1
+    iam:
+      role:
+        statements:
+          - Effect: Allow
+            Actions:
+              - dynamoDB:PutItem
+              - dynamoDB:updateItem
+              - dynamoDB:GetItem
+              - dynamoDB:scan
+            Resource:
+
+
+functions:
+  api:
+    handler: src/index.handler
+    events:
+      - httpApi:
+          path: /
+          method: get
+    insertItem:
+      handler: src/insertItem.handler
+      events:
+        - http:
+          path: /item
+          method: post
+    fetchItems:
+      handler: src/fetchItems.handler
+      events:
+        - httpApi:
+          path: /items
+          method: get
+          fetchItem:
+      handler: src/fetchItem.handler
+      events:
+        - httpApi:
+          path: /items/[id]
+          method: get
+    UpdateItems:
+      handler:src/updateItems.handler
+      events:
+      -http:
+      patch: /items/[id]
+      method: put
+resources:
+  Resources:
+    ItemTableNew:
+      Type: AWS::DnamoDB::Table
+      Properties:
+        TableName: ItemTableNew
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
